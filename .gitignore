@@ -1,0 +1,13 @@
+#intelliJ
+.idea/misc.xml
+.idea/material_theme_project_new.xml
+.idea/modules.xml
+.idea/terraform.iml
+.idea/vcs.xml
+
+#Terraform
+terraform.tfvars
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl

@@ -1,0 +1,59 @@
+name: Terraform GKE
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+      TF_VAR_region: ${{ secrets.GCP_REGION }}
+      TF_VAR_cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+      TF_VAR_machine_type: ${{ secrets.NODE_MACHINE_TYPE }}
+
+    defaults:
+      run:
+        working-directory: terraform/terraform-gke
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Inject Terraform Docs into DOC.md
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: .
+          output-file: DOC.md
+          output-method: inject
+
+      - name: Commit updated DOC.md
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add DOC.md
+          git diff --cached --quiet || git commit -m "docs: update Terraform docs"
+          git push
