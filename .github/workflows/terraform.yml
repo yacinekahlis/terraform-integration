@@ -18,7 +18,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: terraform/terraform-gke
+        working-directory: terraform-gke
 
     steps:
       - name: Checkout code
